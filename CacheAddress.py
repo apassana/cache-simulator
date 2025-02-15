@@ -22,6 +22,9 @@ class Address:
         else:
             raise ValueError(f"Cannot compare with {type(other)}")
 
+    def __str__(self):
+        return f"{self.tag_bits}"
+
     def reset(self):
         self.tag_bits = 0
         self.set_bits = 0
@@ -36,7 +39,8 @@ class Address:
             adjusted_tag_size = self.tag_size - diff
             self.is_data = False
         self.tag_bits = int(bin_mem_address[:adjusted_tag_size], 2)
-        self.set_bits = int(bin_mem_address[adjusted_tag_size:adjusted_tag_size + self.set_size], 2)
+        if self.set_size != 0:
+            self.set_bits = int(bin_mem_address[adjusted_tag_size:adjusted_tag_size + self.set_size], 2)
         self.word_bits = int(bin_mem_address[adjusted_tag_size + self.set_size:], 2)
         self.is_valid = True
 
