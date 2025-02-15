@@ -10,16 +10,15 @@ L1_set_list = [
     4,
     8,
     16,
-    32
+    32,
 ]
-L2_size = 16384
-L2_block = 128
+L2_size = 2048
+L2_block = 64
 L2_set_list = [
     1,
     4,
     16,
     64,
-    128
 ]
 
 H = 1
