@@ -1,6 +1,8 @@
 from WriteBackCache import WriteBackCache
 from WriteThruCache import WriteThruCache
+import pandas as pd
 
+DEFAULT_PATH = "SimData.html"
 
 L1_size = 1024
 L1_block = 32
@@ -43,6 +45,18 @@ def write_thru_cache_test(instructions: list):
         L1_miss_rate = L1_total_miss/L1_total_access
         L1_data_miss_rate = L1_data.miss_count / L1_data.total_accesses
         L1_inst_miss_rate = L1_instructions.miss_count / L1_instructions.total_accesses
+        results = {
+            "L1DMiss": L1_data.miss_count,
+            "L1DTotalAccesses": L1_data.total_accesses,
+            "L1DMissRate": L1_data_miss_rate,
+            "L1IMiss": L1_instructions.miss_count,
+            "L1ITotalAccesses": L1_instructions.total_accesses,
+            "L1IMissRate": L1_inst_miss_rate,
+            "L1MissCount": L1_total_miss,
+            "L1TotalAccesses": L1_total_access,
+            "L1MissRate": L1_miss_rate,
+            "AMAT": H + (L1_miss_rate * M)
+        }
         print(f"Data for {i}-set-associative L1 Cache:")
         print("L1 Data Miss count: ", L1_data.miss_count)
         print("L1 Data Total accesses: ", L1_data.total_accesses)
@@ -55,6 +69,7 @@ def write_thru_cache_test(instructions: list):
         print("L1 Miss rate: ", L1_miss_rate)
         print("AMAT = ", H + (L1_miss_rate * M))
         print("")
+        return results
 
 
 def write_back_cache_test(instructions: list):
@@ -73,6 +88,18 @@ def write_back_cache_test(instructions: list):
         L1_miss_rate = L1_total_miss / L1_total_access
         L1_data_miss_rate = L1_data.miss_count / L1_data.total_accesses
         L1_inst_miss_rate = L1_instructions.miss_count / L1_instructions.total_accesses
+        results = {
+            "L1DMiss": L1_data.miss_count,
+            "L1DTotalAccesses": L1_data.total_accesses,
+            "L1DMissRate": L1_data_miss_rate,
+            "L1IMiss": L1_instructions.miss_count,
+            "L1ITotalAccesses": L1_instructions.total_accesses,
+            "L1IMissRate": L1_inst_miss_rate,
+            "L1MissCount": L1_total_miss,
+            "L1TotalAccesses": L1_total_access,
+            "L1MissRate": L1_miss_rate,
+            "AMAT": H + (L1_miss_rate * M)
+        }
         print(f"Data for {i}-set-associative L1 Cache:")
         print("L1 Data Miss count: ", L1_data.miss_count)
         print("L1 Data Total accesses: ", L1_data.total_accesses)
@@ -85,6 +112,7 @@ def write_back_cache_test(instructions: list):
         print("L1 Miss rate: ", L1_miss_rate)
         print("AMAT = ", H + (L1_miss_rate * M))
         print("")
+        return results
 
 
 def two_level_cache_test(instructions: list):
@@ -107,6 +135,21 @@ def two_level_cache_test(instructions: list):
         L1_inst_miss_rate = L1_instructions.miss_count / L1_instructions.total_accesses
         L1_miss_rate = L1_total_miss/L1_total_access
         L2_miss_rate = L2.miss_count/L2.total_accesses
+        results = {
+            "L1DMiss": L1_data.miss_count,
+            "L1DTotalAccesses": L1_data.total_accesses,
+            "L1DMissRate": L1_data_miss_rate,
+            "L1IMiss": L1_instructions.miss_count,
+            "L1ITotalAccesses": L1_instructions.total_accesses,
+            "L1IMissRate": L1_inst_miss_rate,
+            "L1MissCount": L1_total_miss,
+            "L1TotalAccesses": L1_total_access,
+            "L1MissRate": L1_miss_rate,
+            "L2MissCount": L2.miss_count,
+            "L2TotalAccesses": L2.total_accesses,
+            "L2MissRate": L2.miss_count/L2.total_accesses,
+            "AMAT": H + L1_miss_rate * (L2H + L2_miss_rate * L2M)
+        }
         print(f"Data for {i}-set-associative L2 Cache:")
         print("L1 Data Miss count: ", L1_data.miss_count)
         print("L1 Data Total accesses: ", L1_data.total_accesses)
@@ -122,9 +165,44 @@ def two_level_cache_test(instructions: list):
         print("L2 Miss rate: ", L2.miss_count/L2.total_accesses)
         print("AMAT: ", H + L1_miss_rate * (L2H + L2_miss_rate * L2M))
         print("")
+        return results
+
+
+def run_all_and_save():
+    results = {}
+    trace_list = [
+        "spice.trace",
+        "cc.trace",
+        "tex.trace"
+    ]
+    test_list = [
+        write_thru_cache_test,
+        write_back_cache_test,
+        two_level_cache_test
+    ]
+    test_list_name = [
+        "Write-through Cache test",
+        "Write-back Cache test",
+        "Two Cache test"
+    ]
+    for test_i in range(len(test_list_name)):
+        for trace_i in range(len(trace_list)):
+            trace = open(trace_list[trace_i], 'r')
+            trace_lines = trace.readlines()
+            instructions = []
+            for i in trace_lines:
+                instructions.append(i.split())
+            trace.close()
+            results[f"{test_list_name[test_i]} with {trace_list[trace_i]}"] = test_list[test_i](instructions)
+    data = pd.DataFrame(results)
+    data.to_html(DEFAULT_PATH)
+    print("data exported...")
 
 
 def main():
+    if input("Run all tests (y/n): ") == 'y':
+        run_all_and_save()
+        return 0
     trace_list = [
         "spice.trace",
         "cc.trace",
@@ -145,6 +223,7 @@ def main():
     instructions = []
     for i in trace_lines:
         instructions.append(i.split())
+    trace.close()
 
     test_list = [
         write_thru_cache_test,
