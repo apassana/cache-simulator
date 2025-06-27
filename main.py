@@ -6,6 +6,7 @@ import time
 
 DEFAULT_PATH = "results/SimData_"
 
+# Numbers represent bytes
 L1_size = 1024
 L1_block = 32
 L1_set_list = [
@@ -25,10 +26,11 @@ L2_set_list = [
     64,
 ]
 
-H = 1
-M = 100
-L2H = 10
-L2M = 100
+# Info for average access time
+H = 1  # L1 hit time
+M = 100  # L1 miss time
+L2H = 10  # L2 hit time
+L2M = 100  # L2 miss time
 
 
 def write_thru_cache_test(instructions: list) -> dict:
@@ -117,7 +119,7 @@ def write_back_cache_test(instructions: list) -> dict:
         return results
 
 
-def two_level_cache_test(instructions: list) -> dict:
+def two_level_cache_test(instructions: list[list]) -> dict:
     for i in L2_set_list:
         L1_data = WriteBackCache(L1_size, L1_block, 2)
         L1_instructions = WriteBackCache(L1_size, L1_block, 2)
@@ -268,3 +270,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    input("Press enter to exit...")
